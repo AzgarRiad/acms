@@ -1,0 +1,183 @@
+[
+  {
+    "role": "system",
+    "content": "You are a helpful assistant for a store.\n        When the user asks about a product's price or availability, \n        call the get_product_info tool instead of guessing."
+  },
+  {
+    "role": "user",
+    "content": "Do you have s26 ultra?"
+  },
+  {
+    "role": "assistant",
+    "content": "What specifically would you like to know about the S26 Ultra? For example, are you interested in its **price**, **availability**, or do you want to **order** it?",
+    "thinking": null,
+    "images": null,
+    "tool_name": null,
+    "tool_calls": null
+  },
+  {
+    "role": "user",
+    "content": "What is the price?"
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "thinking": null,
+    "images": null,
+    "tool_name": null,
+    "tool_calls": [
+      {
+        "function": {
+          "name": "get_product_info",
+          "arguments": {
+            "product_name": "S26 Ultra"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "tool_name": "get_product_info",
+    "content": "\"[{\\\"Product_Name\\\": \\\"Samsung galaxy s26 ultra\\\", \\\"Price\\\": 999.0}]\""
+  },
+  {
+    "role": "assistant",
+    "content": "The price for the Samsung galaxy s26 ultra is **$999.00**.\n\nWould you like to know if it's available, or would you like to go ahead and order it?",
+    "thinking": null,
+    "images": null,
+    "tool_name": null,
+    "tool_calls": null
+  },
+  {
+    "role": "user",
+    "content": "Yes, I want to order it"
+  },
+  {
+    "role": "assistant",
+    "content": "Great! To place the order, I just need a couple more pieces of information:\n\n1.  **Your Full Name** (so we know who to charge it to)\n2.  **The Quantity** (how many S26 Ultras you would like)",
+    "thinking": null,
+    "images": null,
+    "tool_name": null,
+    "tool_calls": null
+  },
+  {
+    "role": "user",
+    "content": "My name is Azgar Riad, I want 2 of them, thank you"
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "thinking": null,
+    "images": null,
+    "tool_name": null,
+    "tool_calls": [
+      {
+        "function": {
+          "name": "add_order",
+          "arguments": {
+            "customer_name": "Azgar Riad",
+            "product_name": "Samsung galaxy s26 ultra",
+            "quantity": 2
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "tool_name": "add_order",
+    "content": "{\"status\": \"success\", \"order_id\": 4, \"customer_name\": \"Azgar Riad\", \"product_name\": \"Samsung galaxy s26 ultra\", \"quantity\": 2}"
+  },
+  {
+    "role": "assistant",
+    "content": "Your order has been placed!\n\nHere are the details:\n\n*   **Order ID:** 4\n*   **Customer Name:** Azgar Riad\n*   **Product:** Samsung galaxy s26 ultra\n*   **Quantity:** 2\n\nIs there anything else I can help you with today, perhaps checking on another product or another order?",
+    "thinking": null,
+    "images": null,
+    "tool_name": null,
+    "tool_calls": null
+  },
+  {
+    "role": "user",
+    "content": "Do you have any gpu?"
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "thinking": null,
+    "images": null,
+    "tool_name": null,
+    "tool_calls": [
+      {
+        "function": {
+          "name": "get_products",
+          "arguments": {}
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "tool_name": "get_products",
+    "content": "[{\"id\": 5, \"name\": \"RTX 5080\", \"category\": \"gpu\", \"price\": 2999.0}, {\"id\": 1, \"name\": \"Laptop\", \"category\": \"laptop\", \"price\": 999.99}, {\"id\": 2, \"name\": \"Smartphone\", \"category\": \"phone\", \"price\": 499.99}, {\"id\": 3, \"name\": \"Asus Astral RTX 5090\", \"category\": \"gpu\", \"price\": 6999.0}, {\"id\": 4, \"name\": \"Samsung galaxy s26 ultra\", \"category\": \"phone\", \"price\": 999.0}, {\"id\": 6, \"name\": \"Msi Godlike RTX 5090 32gb OC\", \"category\": \"gpu\", \"price\": 7499.0}]"
+  },
+  {
+    "role": "assistant",
+    "content": "Yes, we have several GPUs! Here is a list of what's available:\n\n*   **RTX 5080:** $2999.00\n*   **Asus Astral RTX 5090:** $6999.00\n*   **Msi Godlike RTX 5090 32gb OC:** $7499.00\n\nAre any of these catching your eye? You can also ask for the price or availability of a specific one!",
+    "thinking": null,
+    "images": null,
+    "tool_name": null,
+    "tool_calls": null
+  },
+  {
+    "role": "user",
+    "content": "I want to order 1 astral 5090, and 1 godlike 5090?"
+  },
+  {
+    "role": "assistant",
+    "content": "",
+    "thinking": null,
+    "images": null,
+    "tool_name": null,
+    "tool_calls": [
+      {
+        "function": {
+          "name": "add_order",
+          "arguments": {
+            "customer_name": "Azgar Riad",
+            "product_name": "Asus Astral RTX 5090",
+            "quantity": 1
+          }
+        }
+      },
+      {
+        "function": {
+          "name": "add_order",
+          "arguments": {
+            "customer_name": "Azgar Riad",
+            "product_name": "Msi Godlike RTX 5090 32gb OC",
+            "quantity": 1
+          }
+        }
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "tool_name": "add_order",
+    "content": "{\"status\": \"success\", \"order_id\": 5, \"customer_name\": \"Azgar Riad\", \"product_name\": \"Asus Astral RTX 5090\", \"quantity\": 1}"
+  },
+  {
+    "role": "tool",
+    "tool_name": "add_order",
+    "content": "{\"status\": \"success\", \"order_id\": 6, \"customer_name\": \"Azgar Riad\", \"product_name\": \"Msi Godlike RTX 5090 32gb OC\", \"quantity\": 1}"
+  },
+  {
+    "role": "assistant",
+    "content": "I have successfully placed both of those orders for you!\n\nHere is a summary:\n\n1.  **Order ID 5:** 1 x Asus Astral RTX 5090\n2.  **Order ID 6:** 1 x Msi Godlike RTX 5090 32gb OC\n\nWould you like me to combine these into one consolidated order, or do you need anything else?",
+    "thinking": null,
+    "images": null,
+    "tool_name": null,
+    "tool_calls": null
+  }
+]
