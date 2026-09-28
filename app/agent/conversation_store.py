@@ -1,48 +1,103 @@
 """
-Handles loading and saving the conversation history to a local JSON file.
-Creates the data directory / file with a default system prompt the first
-time the app runs, so nothing crashes on a fresh checkout.
+Stores Gemini conversation history.
+
+The conversation contains only Gemini-compatible roles:
+    user
+    model
+
+System instruction is kept separately.
 """
+
 import json
 from pathlib import Path
 
+from google.genai import types
+
+
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
 CONVERSATION_FILE = BASE_DIR / "data" / "conversation.json"
 
-DEFAULT_SYSTEM_PROMPT = {
-    "role": "system",
-    "content": (
-        """You are a helpful assistant for a store.
-        When the user asks about a product's price or availability, 
-        call the get_product_info tool instead of guessing."""
-    ),
-}
+
+SYSTEM_INSTRUCTION = """You are a helpful assistant for a store.
+When the user asks about a product's price or availability,
+call the get_product_info tool instead of guessing."""
 
 
 def load_conversation():
-    """Load conversation history, creating a fresh one with a system
-    prompt if the file doesn't exist yet or is empty/corrupted."""
+    """Load conversation history as Gemini Content objects."""
+
     CONVERSATION_FILE.parent.mkdir(parents=True, exist_ok=True)
 
     if not CONVERSATION_FILE.exists():
-        conversation = [DEFAULT_SYSTEM_PROMPT.copy()]
-        save_conversation(conversation)
-        return conversation
+        return []
 
     try:
         with open(CONVERSATION_FILE, "r", encoding="utf-8") as f:
-            conversation = json.load(f)
+            data = json.load(f)
+
     except (json.JSONDecodeError, ValueError):
-        conversation = [DEFAULT_SYSTEM_PROMPT.copy()]
+        return []
 
-    if not conversation or conversation[0].get("role") != "system":
-        conversation.insert(0, DEFAULT_SYSTEM_PROMPT.copy())
+    messages = []
 
-    return conversation
+    for message in data:
+        messages.append(
+            types.Content(
+                role=message["role"],
+                parts=[
+                    types.Part.from_text(
+                        text=part["text"]
+                    )
+                    for part in message["parts"]
+                    if "text" in part
+                ],
+            )
+        )
+
+    return messages
 
 
-def save_conversation(conversation):
-    """Persist the conversation list to disk as JSON."""
+def save_conversation(messages):
+    """Save Gemini Content objects to JSON."""
+
     CONVERSATION_FILE.parent.mkdir(parents=True, exist_ok=True)
+
+    data = []
+
+    for message in messages:
+
+        parts = []
+
+        for part in message.parts:
+
+            if part.text is not None:
+                parts.append({
+                    "text": part.text
+                })
+
+            elif part.function_call is not None:
+                parts.append({
+                    "function_call": {
+                        "name": part.function_call.name,
+                        "args": part.function_call.args,
+                        "id": part.function_call.id,
+                    }
+                })
+
+            elif part.function_response is not None:
+                parts.append({
+                    "function_response": {
+                        "name": part.function_response.name,
+                        "response": part.function_response.response,
+                        "id": part.function_response.id,
+                    }
+                })
+
+        data.append({
+            "role": message.role,
+            "parts": parts,
+        })
+
     with open(CONVERSATION_FILE, "w", encoding="utf-8") as f:
-        json.dump(conversation, f, indent=2)
+        json.dump(data, f, indent=2, ensure_ascii=False)
