@@ -1,7 +1,10 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from dotenv import load_dotenv
+import os
 
-db_url = "postgresql://postgres:riad@localhost:5432/Riad"
+load_dotenv()
+db_url = os.getenv("DB_URL")
 
 engine = create_engine(db_url)
 
