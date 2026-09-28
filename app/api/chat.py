@@ -3,11 +3,16 @@ Core Gemini chat loop.
 
 Sends the conversation + tools to Gemini. If Gemini requests a tool call,
 the tool is executed locally and the result is sent back to Gemini.
+
 This repeats until Gemini returns a final text response.
 """
 
 from google import genai
 from google.genai import types
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from app.agent.conversation_store import load_conversation, save_conversation
 from app.agent.tools import (
@@ -18,15 +23,15 @@ from app.agent.tools import (
 )
 
 
-GEMINI_MODEL_NAME = "gemini-2.5-flash"
+GEMINI_MODEL_NAME = "gemini-3.5-flash-lite"
 
-client = genai.Client()
-
+client = genai.Client(api_key=os.getenv("GENAI_API_KEY"))
+#client = genai.Client(api_key="AQ.Ab8RN6LKMr1vQMZBeO3hwb61P38Oqb9sV-9d--pxjWgCMPgTU")
 
 def gemini_chat(user_input: str) -> str:
+
     messages = load_conversation()
 
-    # Add new user message using Gemini's native role structure
     messages.append(
         types.Content(
             role="user",
@@ -40,13 +45,16 @@ def gemini_chat(user_input: str) -> str:
         types.Tool(
             function_declarations=[
                 types.FunctionDeclaration.from_callable(
-                    callable=get_product_info
+                    client=client,
+                    callable=get_product_info,
                 ),
                 types.FunctionDeclaration.from_callable(
-                    callable=add_order
+                    client=client,
+                    callable=add_order,
                 ),
                 types.FunctionDeclaration.from_callable(
-                    callable=get_products
+                    client=client,
+                    callable=get_products,
                 ),
             ]
         )
@@ -56,27 +64,26 @@ def gemini_chat(user_input: str) -> str:
         system_instruction=(
             """You are a helpful assistant for a store.
             When the user asks about a product's price or availability,
-            call the get_product_info tool instead of guessing."""
+            call the get_product_info tool instead of guessing, prices are in BDT.
+            Carefully place the order, ask user name, product quantity so that the backend system can handle orders"""
         ),
         tools=tools,
 
-        # We execute tools ourselves.
         automatic_function_calling=types.AutomaticFunctionCallingConfig(
             disable=True
         ),
     )
 
     while True:
+
         response = client.models.generate_content(
             model=GEMINI_MODEL_NAME,
             contents=messages,
             config=config,
         )
 
-        # Store Gemini's complete model response.
         messages.append(response.candidates[0].content)
 
-        # Check for tool calls
         if response.function_calls:
 
             function_response_parts = []
@@ -89,30 +96,30 @@ def gemini_chat(user_input: str) -> str:
                 tool_function = AVAILABLE_TOOLS.get(tool_name)
 
                 if tool_function is None:
+
                     result = {
                         "error": f"Unknown tool '{tool_name}'"
                     }
 
                 else:
+
                     try:
                         result = tool_function(**arguments)
 
                     except Exception as exc:
+
                         result = {
                             "error": str(exc)
                         }
-
                 function_response_parts.append(
                     types.Part.from_function_response(
                         name=tool_name,
                         response={
                             "result": result
                         },
-                        id=call.id,
                     )
                 )
 
-            # Gemini function responses are sent as a user Content.
             messages.append(
                 types.Content(
                     role="user",
@@ -122,7 +129,7 @@ def gemini_chat(user_input: str) -> str:
 
             continue
 
-        # No tool calls -> final answer
         save_conversation(messages)
 
         return response.text
+

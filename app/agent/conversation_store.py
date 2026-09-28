@@ -1,11 +1,12 @@
 """
 Stores Gemini conversation history.
 
-The conversation contains only Gemini-compatible roles:
+Conversation roles are Gemini-native:
     user
     model
 
-System instruction is kept separately.
+The system instruction is kept separately and is NOT stored
+as a conversation message.
 """
 
 import json
@@ -27,13 +28,20 @@ call the get_product_info tool instead of guessing."""
 def load_conversation():
     """Load conversation history as Gemini Content objects."""
 
-    CONVERSATION_FILE.parent.mkdir(parents=True, exist_ok=True)
+    CONVERSATION_FILE.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
 
     if not CONVERSATION_FILE.exists():
         return []
 
     try:
-        with open(CONVERSATION_FILE, "r", encoding="utf-8") as f:
+        with open(
+            CONVERSATION_FILE,
+            "r",
+            encoding="utf-8",
+        ) as f:
             data = json.load(f)
 
     except (json.JSONDecodeError, ValueError):
@@ -42,16 +50,55 @@ def load_conversation():
     messages = []
 
     for message in data:
-        messages.append(
-            types.Content(
-                role=message["role"],
-                parts=[
+
+        parts = []
+
+        for part in message.get("parts", []):
+
+            # Text part
+            if "text" in part:
+
+                parts.append(
                     types.Part.from_text(
                         text=part["text"]
                     )
-                    for part in message["parts"]
-                    if "text" in part
-                ],
+                )
+
+            # Function call
+            elif "function_call" in part:
+
+                function_call = part["function_call"]
+
+                parts.append(
+                    types.Part(
+                        function_call=types.FunctionCall(
+                            name=function_call["name"],
+                            args=function_call.get("args", {}),
+                        )
+                    )
+                )
+
+            # Function response
+            elif "function_response" in part:
+
+                function_response = part["function_response"]
+
+                parts.append(
+                    types.Part(
+                        function_response=types.FunctionResponse(
+                            name=function_response["name"],
+                            response=function_response.get(
+                                "response",
+                                {}
+                            ),
+                        )
+                    )
+                )
+
+        messages.append(
+            types.Content(
+                role=message["role"],
+                parts=parts,
             )
         )
 
@@ -61,7 +108,10 @@ def load_conversation():
 def save_conversation(messages):
     """Save Gemini Content objects to JSON."""
 
-    CONVERSATION_FILE.parent.mkdir(parents=True, exist_ok=True)
+    CONVERSATION_FILE.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
 
     data = []
 
@@ -71,26 +121,30 @@ def save_conversation(messages):
 
         for part in message.parts:
 
+            # Normal text
             if part.text is not None:
+
                 parts.append({
                     "text": part.text
                 })
 
+            # Gemini function call
             elif part.function_call is not None:
+
                 parts.append({
                     "function_call": {
                         "name": part.function_call.name,
                         "args": part.function_call.args,
-                        "id": part.function_call.id,
                     }
                 })
 
+            # Gemini function response
             elif part.function_response is not None:
+
                 parts.append({
                     "function_response": {
                         "name": part.function_response.name,
                         "response": part.function_response.response,
-                        "id": part.function_response.id,
                     }
                 })
 
@@ -99,5 +153,15 @@ def save_conversation(messages):
             "parts": parts,
         })
 
-    with open(CONVERSATION_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
+    with open(
+        CONVERSATION_FILE,
+        "w",
+        encoding="utf-8",
+    ) as f:
+
+        json.dump(
+            data,
+            f,
+            indent=2,
+            ensure_ascii=False,
+        )

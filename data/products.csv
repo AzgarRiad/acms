@@ -1,0 +1,32 @@
+
+id,name,category,price
+1,Samsung Galaxy S25,Phone,89999
+2,iPhone 16,Phone,99999
+3,Google Pixel 9,Phone,84999
+4,OnePlus 13,Phone,79999
+5,RTX 5070 Ti 16GB,GPU,104999
+6,RTX 5070 12GB,GPU,84999
+7,RX 9070 XT 16GB,GPU,94999
+8,RTX 4060 8GB,GPU,38999
+9,Lenovo Legion 5,Laptop,124999
+10,ASUS TUF Gaming A15,Laptop,109999
+11,Acer Nitro V 15,Laptop,89999
+12,MacBook Air M4,Laptop,134999
+13,Dell Inspiron 15,Laptop,72999
+14,AMD Ryzen 7 7800X3D,CPU,44999
+15,Intel Core i7-14700K,CPU,52999
+16,AMD Ryzen 5 7600,CPU,22999
+17,Corsair Vengeance 32GB DDR5,RAM,11999
+18,Kingston Fury 16GB DDR5,RAM,6499
+19,Samsung 990 Pro 2TB,SSD,17999
+20,WD Black SN850X 1TB,SSD,10999
+21,Logitech G Pro X Superlight 2,Mouse,14999
+22,Razer DeathAdder V3,Mouse,8999
+23,Keychron K2 Pro,Keyboard,10999
+24,Logitech G915 TKL,Keyboard,17999
+25,Sony WH-1000XM6,Headphone,39999
+26,JBL Live 770NC,Headphone,13999
+27,Dell G2724D 27-inch,Monitor,36999
+28,LG UltraGear 27GS60F,Monitor,29999
+29,TP-Link Archer AX55,Router,11999
+30,ASUS RT-AX86U Pro,Router,22999
