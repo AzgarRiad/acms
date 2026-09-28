@@ -4,326 +4,74 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Commerce Manager</title>
-<style>
-  :root{
-    --bg:#f7f7f5; --panel:#ffffff; --ink:#1e1e1e; --muted:#6b6b6b;
-    --line:#e3e2de; --accent:#2f6f4f; --accent-ink:#ffffff;
-    --danger:#b3432b; --radius:6px;
-  }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
-      --bg:#15161a; --panel:#1d1e23; --ink:#eceeee; --muted:#9a9ea3;
-      --line:#33353b; --accent:#4c9a72; --accent-ink:#0b0b0b;
-    }
-  }
-  :root[data-theme="dark"]{
-    --bg:#15161a; --panel:#1d1e23; --ink:#eceeee; --muted:#9a9ea3;
-    --line:#33353b; --accent:#4c9a72; --accent-ink:#0b0b0b;
-  }
-  *{box-sizing:border-box}
-  body{
-    margin:0; background:var(--bg); color:var(--ink);
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    padding-top:env(safe-area-inset-top,0px);
-    padding-bottom:env(safe-area-inset-bottom,0px);
-  }
-  header{
-    padding:20px 24px 14px; border-bottom:1px solid var(--line);
-    display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap;
-  }
-  header h1{font-size:17px; margin:0; font-weight:600; letter-spacing:.2px}
-  header p{margin:2px 0 0; color:var(--muted); font-size:12.5px}
-  nav{display:flex; gap:4px; padding:14px 24px 0}
-  nav button{
-    background:none; border:1px solid var(--line); color:var(--muted);
-    padding:7px 14px; font:inherit; font-size:13px; cursor:pointer;
-    border-radius:var(--radius) var(--radius) 0 0; border-bottom:none;
-    position:relative; top:1px;
-  }
-  nav button.active{color:var(--ink); background:var(--panel); border-bottom:1px solid var(--panel)}
-  main{padding:0 24px 40px; max-width:960px; margin:0 auto}
-  section{
-    background:var(--panel); border:1px solid var(--line); border-radius:0 var(--radius) var(--radius) var(--radius);
-    padding:20px; overflow-x:auto;
-  }
-  .toolbar{display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; gap:10px; flex-wrap:wrap}
-  .toolbar h2{font-size:14px; margin:0; color:var(--muted); font-weight:600}
-  button.primary{
-    background:var(--accent); color:var(--accent-ink); border:none; border-radius:var(--radius);
-    padding:8px 14px; font:inherit; font-size:13px; cursor:pointer;
-  }
-  button.primary:hover{opacity:.9}
-  table{width:100%; border-collapse:collapse; font-size:13px}
-  th, td{text-align:left; padding:9px 8px; border-bottom:1px solid var(--line); white-space:nowrap}
-  th{color:var(--muted); font-weight:600; font-size:12px}
-  td.name{white-space:normal; max-width:260px}
-  .row-actions button{
-    background:none; border:1px solid var(--line); color:var(--ink);
-    padding:4px 9px; font:inherit; font-size:12px; cursor:pointer; border-radius:var(--radius); margin-right:4px;
-  }
-  .row-actions button.delete{color:var(--danger); border-color:var(--danger)}
-  .status{padding:2px 8px; border-radius:20px; font-size:11px; border:1px solid var(--line)}
-  .status.paid{color:var(--accent); border-color:var(--accent)}
-  .status.pending{color:#a8791f; border-color:#a8791f}
-  .status.cancelled{color:var(--danger); border-color:var(--danger)}
-  .empty{color:var(--muted); font-size:13px; padding:18px 4px}
-
-  /* modal */
-  .overlay{
-    position:fixed; inset:0; background:rgba(0,0,0,.4); display:none;
-    align-items:center; justify-content:center; padding:16px; z-index:10;
-  }
-  .overlay.open{display:flex}
-  .modal{
-    background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
-    width:100%; max-width:380px; padding:20px;
-  }
-  .modal h3{margin:0 0 14px; font-size:14px}
-  .field{margin-bottom:12px}
-  .field label{display:block; font-size:12px; color:var(--muted); margin-bottom:4px}
-  .field input{
-    width:100%; padding:8px; font:inherit; font-size:13px; background:var(--bg);
-    border:1px solid var(--line); border-radius:var(--radius); color:var(--ink);
-  }
-  .modal-actions{display:flex; justify-content:flex-end; gap:8px; margin-top:16px}
-  .modal-actions button{
-    padding:7px 14px; font:inherit; font-size:13px; cursor:pointer; border-radius:var(--radius); border:1px solid var(--line);
-    background:none; color:var(--ink);
-  }
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-
 <header>
-  <div>
-    <h1>Commerce Manager</h1>
-    <p>Product catalog and order overview — demo data, stored in this browser only.</p>
+  <h1>🛒 Commerce Manager</h1>
+  <div class="tabs">
+    <button class="tab active" id="tabCatalogBtn" onclick="showTab('catalog')">Catalog</button>
+    <button class="tab" id="tabOrdersBtn" onclick="showTab('orders')">Orders</button>
+    <button class="tab" style="background:transparent;" onclick="resetData()">↺ Reset data</button>
   </div>
 </header>
-
-<nav>
-  <button id="tab-products" class="active" onclick="showTab('products')">Products</button>
-  <button id="tab-orders" onclick="showTab('orders')">Orders</button>
-</nav>
-
 <main>
 
-  <!-- PRODUCTS TAB -->
-  <section id="view-products">
-    <div class="toolbar">
-      <h2>Products</h2>
-      <button class="primary" onclick="openProductModal()">+ Add product</button>
-    </div>
-    <table>
-      <thead>
-        <tr><th>Name</th><th>Price</th><th>Stock</th><th></th></tr>
-      </thead>
-      <tbody id="product-rows"></tbody>
-    </table>
-    <div id="product-empty" class="empty" style="display:none">No products yet. Add your first one above.</div>
-  </section>
+<div class="stat">
+  <div class="box"><div class="n" id="statProducts">0</div><div class="l">Products</div></div>
+  <div class="box"><div class="n" id="statStock">0</div><div class="l">Units in stock</div></div>
+  <div class="box"><div class="n" id="statOrders">0</div><div class="l">Orders</div></div>
+  <div class="box"><div class="n" id="statRevenue">৳0</div><div class="l">Revenue (paid)</div></div>
+</div>
 
-  <!-- ORDERS TAB -->
-  <section id="view-orders" style="display:none">
-    <div class="toolbar">
-      <h2>Orders</h2>
+<!-- CATALOG TAB -->
+<div id="tabCatalog">
+  <div class="card">
+    <h2>Add product</h2>
+    <div class="row">
+      <input id="pName" placeholder="Name">
+      <input id="pPrice" type="number" step="0.01" placeholder="Price" class="qty" style="width:90px">
+      <input id="pStock" type="number" placeholder="Stock" class="qty" style="width:80px">
+      <button onclick="addProduct()">Add</button>
     </div>
-    <table>
-      <thead>
-        <tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th></tr>
-      </thead>
-      <tbody id="order-rows"></tbody>
-    </table>
-  </section>
-
-</main>
-
-<!-- Add / Edit product modal -->
-<div class="overlay" id="product-overlay">
-  <div class="modal">
-    <h3 id="modal-title">Add product</h3>
-    <div class="field">
-      <label for="input-name">Name</label>
-      <input id="input-name" type="text" placeholder="e.g. RTX 4060 GPU">
+  </div>
+  <div class="card">
+    <h2>Product catalog</h2>
+    <div class="tablewrap">
+      <table id="productTable">
+        <thead><tr><th>Name</th><th>Price</th><th>Stock</th><th colspan="2"></th></tr></thead>
+        <tbody></tbody>
+      </table>
     </div>
-    <div class="field">
-      <label for="input-price">Price</label>
-      <input id="input-price" type="number" step="0.01" placeholder="0.00">
-    </div>
-    <div class="field">
-      <label for="input-stock">Stock</label>
-      <input id="input-stock" type="number" step="1" placeholder="0">
-    </div>
-    <div class="modal-actions">
-      <button onclick="closeProductModal()">Cancel</button>
-      <button class="primary" onclick="saveProduct()">Save</button>
-    </div>
+    <div id="productEmpty" class="empty hidden">No products yet — add one above.</div>
   </div>
 </div>
 
-<script>
-/* -------------------------------------------------------------
-   DATA
-   Products: kept in localStorage so edits survive a page reload.
-   Orders: static demo data for now (read-only) — swap this array
-   for a real API call once your backend is ready.
-------------------------------------------------------------- */
+<!-- ORDERS TAB -->
+<div id="tabOrders" class="hidden">
+  <div class="card">
+    <h2>New order</h2>
+    <div id="orderItems"></div>
+    <div class="row" style="margin-bottom:10px;">
+      <button class="secondary" onclick="addOrderLine()">+ Add item</button>
+    </div>
+    <input id="customerName" placeholder="Customer name (optional)" style="margin-bottom:10px;">
+    <input id="customerPhone" placeholder="Phone number (optional)" style="margin-bottom:10px;">
+    <button onclick="createOrder()">Create order</button>
+  </div>
+  <div class="card">
+    <h2>Order overview</h2>
+    <div class="tablewrap">
+      <table id="orderTable">
+        <thead><tr><th>Order</th><th>Customer</th><th>Phone</th><th>Items</th><th>Total</th><th>Status</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div id="orderEmpty" class="empty hidden">No orders yet.</div>
+  </div>
+</div>
 
-const STORAGE_KEY = "commerce-manager-products";
-
-function loadProducts(){
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (raw) {
-    try { return JSON.parse(raw); } catch(e) { /* fall through to defaults */ }
-  }
-  // starter demo data
-  return [
-    { id: 1, name: "RTX 4060 GPU",      price: 299.99, stock: 12 },
-    { id: 2, name: "Ryzen 5 7600 CPU",  price: 189.00, stock: 8  },
-    { id: 3, name: "32GB DDR5 RAM Kit", price: 89.50,  stock: 25 },
-  ];
-}
-
-function saveProducts(){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
-}
-
-let products = loadProducts();
-let nextId = Math.max(0, ...products.map(p => p.id)) + 1;
-let editingId = null; // null = adding a new product, otherwise the id being edited
-
-// Demo orders — read-only for now. Replace with a fetch() to your API later.
-const orders = [
-  { id: "ORD-1001", customer: "Fahim R.",  items: 2, total: 488.99, status: "paid" },
-  { id: "ORD-1002", customer: "Nusrat J.", items: 1, total: 89.50,  status: "pending" },
-  { id: "ORD-1003", customer: "Tanvir A.", items: 3, total: 578.98, status: "cancelled" },
-];
-
-/* -------------------------------------------------------------
-   TABS
-------------------------------------------------------------- */
-function showTab(name){
-  document.getElementById("view-products").style.display = name === "products" ? "block" : "none";
-  document.getElementById("view-orders").style.display   = name === "orders"   ? "block" : "none";
-  document.getElementById("tab-products").classList.toggle("active", name === "products");
-  document.getElementById("tab-orders").classList.toggle("active", name === "orders");
-}
-
-/* -------------------------------------------------------------
-   RENDER
-------------------------------------------------------------- */
-function formatMoney(n){
-  return "$" + Number(n).toFixed(2);
-}
-
-function renderProducts(){
-  const body = document.getElementById("product-rows");
-  const empty = document.getElementById("product-empty");
-  body.innerHTML = "";
-
-  if (products.length === 0){
-    empty.style.display = "block";
-    return;
-  }
-  empty.style.display = "none";
-
-  products.forEach(p => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td class="name">${escapeHtml(p.name)}</td>
-      <td>${formatMoney(p.price)}</td>
-      <td>${p.stock}</td>
-      <td class="row-actions">
-        <button onclick="openProductModal(${p.id})">Edit</button>
-        <button class="delete" onclick="deleteProduct(${p.id})">Delete</button>
-      </td>`;
-    body.appendChild(tr);
-  });
-}
-
-function renderOrders(){
-  const body = document.getElementById("order-rows");
-  body.innerHTML = "";
-  orders.forEach(o => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${o.id}</td>
-      <td>${escapeHtml(o.customer)}</td>
-      <td>${o.items}</td>
-      <td>${formatMoney(o.total)}</td>
-      <td><span class="status ${o.status}">${o.status}</span></td>`;
-    body.appendChild(tr);
-  });
-}
-
-function escapeHtml(str){
-  const div = document.createElement("div");
-  div.textContent = str;
-  return div.innerHTML;
-}
-
-/* -------------------------------------------------------------
-   CRUD — products
-------------------------------------------------------------- */
-function openProductModal(id){
-  editingId = id ?? null;
-  const overlay = document.getElementById("product-overlay");
-  const title = document.getElementById("modal-title");
-
-  if (editingId){
-    const p = products.find(x => x.id === editingId);
-    title.textContent = "Edit product";
-    document.getElementById("input-name").value = p.name;
-    document.getElementById("input-price").value = p.price;
-    document.getElementById("input-stock").value = p.stock;
-  } else {
-    title.textContent = "Add product";
-    document.getElementById("input-name").value = "";
-    document.getElementById("input-price").value = "";
-    document.getElementById("input-stock").value = "";
-  }
-  overlay.classList.add("open");
-}
-
-function closeProductModal(){
-  document.getElementById("product-overlay").classList.remove("open");
-}
-
-function saveProduct(){
-  const name = document.getElementById("input-name").value.trim();
-  const price = parseFloat(document.getElementById("input-price").value);
-  const stock = parseInt(document.getElementById("input-stock").value, 10);
-
-  if (!name || isNaN(price) || isNaN(stock)){
-    alert("Please fill in name, price and stock.");
-    return;
-  }
-
-  if (editingId){
-    const p = products.find(x => x.id === editingId);
-    p.name = name; p.price = price; p.stock = stock;
-  } else {
-    products.push({ id: nextId++, name, price, stock });
-  }
-
-  saveProducts();
-  renderProducts();
-  closeProductModal();
-}
-
-function deleteProduct(id){
-  if (!confirm("Delete this product?")) return;
-  products = products.filter(p => p.id !== id);
-  saveProducts();
-  renderProducts();
-}
-
-/* -------------------------------------------------------------
-   INIT
-------------------------------------------------------------- */
-renderProducts();
-renderOrders();
-</script>
-
+</main>
+<script src="script.js"></script>
 </body>
 </html>
